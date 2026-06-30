@@ -160,6 +160,7 @@ MLX-LM should be tested early for two reasons:
 
 - it is optimized for Apple Silicon and should be more realistic on an M2 Mac
 - its generation utilities expose token-level log-probability data, which is the key requirement for faithful power sampling
+- LocalBooster now uses MLX-LM's `generate_step` API so each sampled continuation benefits from KV cache after the prompt prefill
 
 The practical path is:
 
@@ -167,6 +168,7 @@ The practical path is:
 - keep prompts, benchmark format, and reports backend-independent
 - add an MLX backend as the first Mac-native backend
 - allow standard and low-temperature baselines to run on simpler local runtimes sooner
+- treat cross-proposal prompt-cache reuse as a later optimization after the `Qwen3-0.6B` and `Qwen3-1.7B` smoke paths are stable
 
 ## MLX Benchmark Lane
 

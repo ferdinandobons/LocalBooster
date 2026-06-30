@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import random
 from typing import Any
 
 from localbooster.backends.base import SampledContinuation
@@ -11,11 +10,11 @@ from localbooster.backends.errors import OptionalDependencyError
 
 
 class MLXBackend:
-    """Minimal MLX-LM backend.
+    """MLX-LM backend with cached continuation sampling.
 
-    The implementation intentionally samples token-by-token from model logits. It is slower than
-    an optimized cached path, but it gives LocalBooster the log-probability traces needed by power
-    sampling and keeps the first implementation easy to verify.
+    MLX-LM handles prompt prefill and per-token generation with a KV cache. LocalBooster keeps
+    the returned base log-probability vectors so power sampling can compute both proposal and
+    target weights for Metropolis-Hastings.
     """
 
     backend_name = "mlx"
@@ -24,12 +23,16 @@ class MLXBackend:
         try:
             import mlx.core as mx
             import numpy as np
+            from mlx_lm.generate import generate_step
             from mlx_lm import load
+            from mlx_lm.sample_utils import make_sampler
         except Exception as exc:  # pragma: no cover - exercised only without optional deps
             raise OptionalDependencyError("MLX backend requires `localbooster[mlx]`.") from exc
 
         self.mx = mx
         self.np = np
+        self.generate_step = generate_step
+        self.make_sampler = make_sampler
         self.model_id = model_id
         self.model, self.tokenizer = load(model_id, **load_kwargs)
         self.eos_token_id = getattr(self.tokenizer, "eos_token_id", None)
@@ -55,24 +58,26 @@ class MLXBackend:
     ) -> SampledContinuation:
         if temperature <= 0:
             raise ValueError("temperature must be greater than 0")
-        rng = random.Random(seed)
+        if seed is not None:
+            self.mx.random.seed(seed)
         generated: list[int] = []
         proposal_logprobs: list[float] = []
         target_logprobs: list[float] = []
-        tokens = list(prefix)
         hit_eos = False
+        prompt = self.mx.array(prefix[-self.context_size :], dtype=self.mx.uint32)
+        sampler = self.make_sampler(temp=temperature)
 
-        for _ in range(max_new_tokens):
-            input_tokens = tokens[-self.context_size :]
-            logits = self._next_logits(input_tokens)
-            base_logprobs = _log_softmax(logits, self.np)
-            proposal_logprobs_arr = _log_softmax(logits / temperature, self.np)
-            probs = self.np.exp(proposal_logprobs_arr)
-            probs = probs / probs.sum()
-            next_token = int(rng.choices(range(len(probs)), weights=probs, k=1)[0])
+        for token, logprobs in self.generate_step(
+            prompt,
+            self.model,
+            max_tokens=max_new_tokens,
+            sampler=sampler,
+        ):
+            next_token = int(token)
+            base_logprobs = self._to_numpy(logprobs)
+            proposal_logprobs_arr = _log_softmax(base_logprobs / temperature, self.np)
 
             generated.append(next_token)
-            tokens.append(next_token)
             proposal_logprobs.append(float(proposal_logprobs_arr[next_token]))
             target_logprobs.append(float(alpha * base_logprobs[next_token]))
 
@@ -88,16 +93,10 @@ class MLXBackend:
             hit_eos=hit_eos,
         )
 
-    def _next_logits(self, token_ids: list[int]):
-        mx = self.mx
-        np = self.np
-        inputs = mx.array([token_ids])
-        outputs = self.model(inputs)
-        if isinstance(outputs, tuple):
-            outputs = outputs[0]
-        logits = outputs[0, -1].astype(mx.float32)
-        mx.eval(logits)
-        return np.array(logits.tolist(), dtype=float)
+    def _to_numpy(self, array):
+        array = array.astype(self.mx.float32)
+        self.mx.eval(array)
+        return self.np.array(array.tolist(), dtype=float)
 
 
 def _log_softmax(logits, np):
