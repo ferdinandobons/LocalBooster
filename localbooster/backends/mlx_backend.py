@@ -95,8 +95,9 @@ class MLXBackend:
         outputs = self.model(inputs)
         if isinstance(outputs, tuple):
             outputs = outputs[0]
-        mx.eval(outputs)
-        return np.array(outputs[0, -1], dtype=float)
+        logits = outputs[0, -1].astype(mx.float32)
+        mx.eval(logits)
+        return np.array(logits.tolist(), dtype=float)
 
 
 def _log_softmax(logits, np):

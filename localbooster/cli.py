@@ -138,7 +138,8 @@ def cmd_report(args: argparse.Namespace) -> int:
                     f"{path} is not a LocalBooster result file; expected records with "
                     "`result.metrics`"
                 )
-            metrics = record["result"]["metrics"]
+            metrics = dict(record["result"]["metrics"])
+            metrics["sampler"] = record.get("sampler", metrics["sampler"])
             rows.append(metrics)
     if not rows:
         print("No rows.")
