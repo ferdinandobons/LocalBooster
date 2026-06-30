@@ -10,6 +10,8 @@ LocalBooster is not a fine-tuning project and does not create new model weights.
 
 The goal is to build a practical inference-time booster for local LLMs: a CLI and Python library that can compare normal sampling, low-temperature sampling, and power-sampling-style generation on reasoning-heavy tasks.
 
+The initial hardware target is a small local machine: an Apple Silicon MacBook with 8 GB of unified memory. That means the MVP should prioritize small quantized models first and treat 7B+ models as optional stress tests, not defaults.
+
 ## MVP
 
 The first useful version should provide:
@@ -25,18 +27,29 @@ Example target workflow:
 
 ```bash
 localbooster generate \
-  --model Qwen/Qwen3-8B \
+  --model Qwen/Qwen3-1.7B \
   --prompt "Solve this step by step..." \
   --mode balanced
 ```
 
 ```bash
 localbooster bench \
-  --model Qwen/Qwen3-8B \
+  --model Qwen/Qwen3-1.7B \
   --tasks math500,gsm8k,humaneval \
   --samplers standard,temperature,power-fast,power-balanced \
-  --out results/qwen3-8b.jsonl
+  --out results/qwen3-1.7b.jsonl
 ```
+
+## Initial Local Model Targets
+
+For an 8 GB Mac, start with:
+
+- `Qwen/Qwen3-0.6B`
+- `Qwen/Qwen3-1.7B`
+- `deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B`
+- `Qwen/Qwen2.5-Coder-1.5B-Instruct`
+
+Use 3B-4B models only after the 1B-2B path is stable. Use 7B+ models only on stronger hardware or as slow stress tests.
 
 ## Benchmark Principle
 
