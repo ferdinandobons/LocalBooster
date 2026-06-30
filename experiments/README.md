@@ -11,5 +11,7 @@ Each experiment should include:
 
 Current experiments:
 
-- [Qwen3 0.6B MLX smoke experiment](qwen3_0_6b_mlx_smoke_2026_06_30/README.md)
-
+- [Qwen3 0.6B MLX smoke experiment, 12 tokens](qwen3_0_6b_mlx_smoke_2026_06_30/README.md)
+- [Qwen3 0.6B MLX smoke experiment, 32 tokens](qwen3_0_6b_mlx_smoke_t32_2026_06_30/README.md)
+- [Qwen3 0.6B MLX smoke experiment, 64 tokens](qwen3_0_6b_mlx_smoke_t64_2026_06_30/README.md)
+- [Qwen3 0.6B MLX smoke scaling, 12 vs 32 vs 64 tokens](qwen3_0_6b_mlx_smoke_scaling_2026_06_30/README.md)

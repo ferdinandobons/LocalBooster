@@ -1,4 +1,4 @@
-# Qwen3 0.6B MLX Smoke Experiment T12
+# Qwen3 0.6B MLX Smoke Experiment T64
 
 This folder contains a tracked LocalBooster smoke experiment.
 
@@ -8,15 +8,15 @@ This folder contains a tracked LocalBooster smoke experiment.
 - model: `mlx-community/Qwen3-0.6B-4bit`
 - records: `9` JSONL rows
 - purpose: runtime and cost smoke test, not an accuracy benchmark
-- note: runs used short 12-token completions, so answers may be incomplete
+- note: runs used short 64-token completions, so answers may be incomplete
 
 ## Summary
 
 | Sampler | Runs | Avg Latency | Avg Cost x | Avg Acceptance | Avg Generated | Avg Sampled |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `standard` | 3 | 0.23s | 1.00 | n/a | 12.0 | 12.0 |
-| `temperature` | 3 | 0.21s | 1.00 | n/a | 12.0 | 12.0 |
-| `power-fast` | 3 | 1.71s | 5.03 | 0.72 | 12.0 | 60.3 |
+| `standard` | 3 | 0.78s | 1.00 | n/a | 64.0 | 64.0 |
+| `temperature` | 3 | 0.74s | 1.00 | n/a | 64.0 | 64.0 |
+| `power-fast` | 3 | 6.37s | 5.18 | 0.56 | 64.0 | 331.7 |
 
 ## Files
 

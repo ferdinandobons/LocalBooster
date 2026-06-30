@@ -1,5 +1,5 @@
 {
-  "title": "Qwen3 0.6B MLX Smoke Experiment T12",
+  "title": "Qwen3 0.6B MLX Smoke Experiment T32",
   "record_count": 9,
   "summaries": [
     {
@@ -7,33 +7,33 @@
       "model": "mlx-community/Qwen3-0.6B-4bit",
       "sampler": "standard",
       "runs": 3,
-      "avg_latency_seconds": 0.2281512359622866,
+      "avg_latency_seconds": 0.736041819366316,
       "avg_cost_multiplier": 1.0,
       "avg_acceptance_ratio": null,
-      "avg_generated_tokens": 12,
-      "avg_sampled_tokens": 12
+      "avg_generated_tokens": 32,
+      "avg_sampled_tokens": 32
     },
     {
       "backend": "mlx",
       "model": "mlx-community/Qwen3-0.6B-4bit",
       "sampler": "temperature",
       "runs": 3,
-      "avg_latency_seconds": 0.20915738865733147,
+      "avg_latency_seconds": 0.47544119437225163,
       "avg_cost_multiplier": 1.0,
       "avg_acceptance_ratio": null,
-      "avg_generated_tokens": 12,
-      "avg_sampled_tokens": 12
+      "avg_generated_tokens": 32,
+      "avg_sampled_tokens": 32
     },
     {
       "backend": "mlx",
       "model": "mlx-community/Qwen3-0.6B-4bit",
       "sampler": "power-fast",
       "runs": 3,
-      "avg_latency_seconds": 1.7101790000063677,
-      "avg_cost_multiplier": 5.027777777777778,
-      "avg_acceptance_ratio": 0.7222222222222222,
-      "avg_generated_tokens": 12,
-      "avg_sampled_tokens": 60.333333333333336
+      "avg_latency_seconds": 4.257722444289054,
+      "avg_cost_multiplier": 6.53125,
+      "avg_acceptance_ratio": 0.7708333333333334,
+      "avg_generated_tokens": 32,
+      "avg_sampled_tokens": 209
     }
   ]
 }

@@ -151,7 +151,11 @@ def write_experiment(
 
 def write_summary_csv(path: Path, summaries: list[SummaryRow]) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(summaries[0].as_dict()))
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=list(summaries[0].as_dict()),
+            lineterminator="\n",
+        )
         writer.writeheader()
         for row in summaries:
             writer.writerow(row.as_dict())
@@ -179,6 +183,7 @@ def write_readme(
 ) -> None:
     model = summaries[0].model if summaries else "unknown"
     backend = summaries[0].backend if summaries else "unknown"
+    generated_tokens = summaries[0].avg_generated_tokens if summaries else 0
     lines = [
         f"# {title}",
         "",
@@ -190,11 +195,17 @@ def write_readme(
         f"- model: `{model}`",
         f"- records: `{len(records)}` JSONL rows",
         "- purpose: runtime and cost smoke test, not an accuracy benchmark",
-        "- note: runs used short 12-token completions, so many answers are incomplete",
+        (
+            f"- note: runs used short {generated_tokens:.0f}-token completions, "
+            "so answers may be incomplete"
+        ),
         "",
         "## Summary",
         "",
-        "| Sampler | Runs | Avg Latency | Avg Cost x | Avg Acceptance | Avg Generated | Avg Sampled |",
+        (
+            "| Sampler | Runs | Avg Latency | Avg Cost x | Avg Acceptance | "
+            "Avg Generated | Avg Sampled |"
+        ),
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in summaries:
@@ -229,7 +240,7 @@ def write_readme(
             "",
         ]
     )
-    path.write_text("\n".join(lines), encoding="utf-8")
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
 def write_bar_chart(
@@ -297,7 +308,14 @@ def write_grouped_token_chart(path: Path, summaries: list[SummaryRow]) -> None:
             f'width="{sampled_width:.2f}" height="{bar_height}" rx="3" fill="#db4437" />'
         )
         svg.append(svg_text(margin_left + generated_width + 10, y + 14, "generated", size=12))
-        svg.append(svg_text(margin_left + sampled_width + 10, y + bar_height + 20, "sampled", size=12))
+        svg.append(
+            svg_text(
+                margin_left + sampled_width + 10,
+                y + bar_height + 20,
+                "sampled",
+                size=12,
+            )
+        )
     svg.append("</svg>\n")
     path.write_text("\n".join(svg), encoding="utf-8")
 
