@@ -12,6 +12,8 @@ The goal is to build a practical inference-time booster for local LLMs: a CLI an
 
 The initial hardware target is a small local machine: an Apple Silicon MacBook with 8 GB of unified memory. That means the MVP should prioritize small quantized models first and treat 7B+ models as optional stress tests, not defaults.
 
+For Apple Silicon, LocalBooster should evaluate both Hugging Face Transformers and MLX-LM. Transformers is the most portable first backend for algorithm correctness; MLX-LM is the practical Mac-native backend to test real local usability.
+
 ## MVP
 
 The first useful version should provide:
@@ -48,6 +50,8 @@ For an 8 GB Mac, start with:
 - `Qwen/Qwen3-1.7B`
 - `deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B`
 - `Qwen/Qwen2.5-Coder-1.5B-Instruct`
+
+For MLX-specific runs, prefer matching `mlx-community` quantized variants of the same models where available, especially 4-bit variants for 8 GB machines.
 
 Use 3B-4B models only after the 1B-2B path is stable. Use 7B+ models only on stronger hardware or as slow stress tests.
 

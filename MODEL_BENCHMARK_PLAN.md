@@ -43,6 +43,8 @@ A model is a good first target if it is:
 
 Power sampling is easiest to implement faithfully with Transformers first. Runtimes such as Ollama, llama.cpp, MLX, vLLM, or SGLang can be added later only if they expose the token likelihoods needed by the sampler.
 
+MLX-LM deserves special treatment for the target Mac. It is not just another runtime: it is the Mac-native path that can make the project usable on Apple Silicon. The benchmark plan should therefore include a Transformers lane for correctness and an MLX lane for practical local performance.
+
 ## Recommended First Models For M2 8 GB
 
 ### Tier 1: Local-Safe MVP Models
@@ -152,14 +154,43 @@ For this hardware, a useful result is not "largest model runs once". A useful re
 
 ## Runtime Implications
 
-The cleanest first implementation is Hugging Face Transformers because it exposes logits and token-level likelihoods. On Apple Silicon with 8 GB, this may be slower or heavier than native MLX runtimes.
+The cleanest first implementation is Hugging Face Transformers because it exposes logits and token-level likelihoods in a familiar cross-platform way. On Apple Silicon with 8 GB, this may be slower or heavier than native MLX runtimes.
+
+MLX-LM should be tested early for two reasons:
+
+- it is optimized for Apple Silicon and should be more realistic on an M2 Mac
+- its generation utilities expose token-level log-probability data, which is the key requirement for faithful power sampling
 
 The practical path is:
 
 - implement the algorithm first with Transformers for correctness
 - keep prompts, benchmark format, and reports backend-independent
-- add an MLX backend later only if it can expose the likelihood data needed by power sampling
+- add an MLX backend as the first Mac-native backend
 - allow standard and low-temperature baselines to run on simpler local runtimes sooner
+
+## MLX Benchmark Lane
+
+The MLX lane should answer a different question than the Transformers lane:
+
+> On the actual 8 GB Mac, which small quantized model gives the best quality-latency tradeoff with and without LocalBooster?
+
+Suggested MLX test matrix:
+
+| Model family | MLX target | Standard | Low-temp | Power-fast | Power-balanced |
+| --- | --- | --- | --- | --- | --- |
+| Qwen small | `mlx-community` Qwen3 0.6B 4-bit variant | yes | yes | yes | optional |
+| Qwen main | `mlx-community` Qwen3 1.7B 4-bit variant | yes | yes | yes | yes |
+| DeepSeek reasoning | `mlx-community` DeepSeek-R1-Distill-Qwen-1.5B 4-bit variant | yes | yes | optional | optional |
+| Qwen Coder | `mlx-community` Qwen2.5-Coder 1.5B Instruct 4-bit variant | yes | yes | yes | optional |
+
+The first implementation can use model IDs as user-provided strings instead of hard-coding exact `mlx-community` repository names, because quantized model names change and multiple quantization variants may exist.
+
+Report backend separately:
+
+- `backend=transformers`
+- `backend=mlx`
+
+Do not compare a full-precision Transformers run against a 4-bit MLX run without labeling precision and quantization clearly.
 
 ## Suggested First Benchmark Matrix
 
