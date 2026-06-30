@@ -1,0 +1,2 @@
+"""LocalBooster test suite."""
+

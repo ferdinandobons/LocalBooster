@@ -25,6 +25,26 @@ The first useful version should provide:
 - benchmark runners for small reasoning and coding suites
 - reports that include both quality and cost metrics
 
+## Install
+
+Core package only:
+
+```bash
+python3 -m pip install -e .
+```
+
+Transformers backend:
+
+```bash
+python3 -m pip install -e ".[transformers]"
+```
+
+MLX backend for Apple Silicon:
+
+```bash
+python3 -m pip install -e ".[mlx]"
+```
+
 Example target workflow:
 
 ```bash
@@ -40,6 +60,24 @@ localbooster bench \
   --tasks math500,gsm8k,humaneval \
   --samplers standard,temperature,power-fast,power-balanced \
   --out results/qwen3-1.7b.jsonl
+```
+
+Small local smoke dataset:
+
+```bash
+localbooster bench \
+  --backend mlx \
+  --model mlx-community/Qwen3-1.7B-4bit \
+  --dataset examples/benchmarks/smoke_reasoning.jsonl \
+  --samplers standard,temperature,power-fast \
+  --max-new-tokens 128 \
+  --out results/smoke-qwen3-1.7b-mlx.jsonl
+```
+
+Summarize result costs:
+
+```bash
+localbooster report results/*.jsonl
 ```
 
 ## Initial Local Model Targets
