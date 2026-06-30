@@ -111,6 +111,7 @@ Every report should include latency, token cost, acceptance ratio, hardware, qua
 - [Project blueprint](LOCALBOOSTER_BLUEPRINT.md)
 - [Model and benchmark plan](MODEL_BENCHMARK_PLAN.md)
 - [MLX backend notes](docs/MLX_BACKEND_NOTES.md)
+- [Experiments](experiments/README.md)
 
 ## License
 
