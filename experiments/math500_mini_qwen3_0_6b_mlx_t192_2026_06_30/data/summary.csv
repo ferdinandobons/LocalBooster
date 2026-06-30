@@ -1,0 +1,4 @@
+backend,model,sampler,runs,avg_latency_seconds,avg_cost_multiplier,avg_acceptance_ratio,avg_accuracy,avg_generated_tokens,avg_sampled_tokens
+mlx,mlx-community/Qwen3-0.6B-4bit,standard,6,4.985568027982178,1.0,,0.0,192,192
+mlx,mlx-community/Qwen3-0.6B-4bit,temperature,6,4.497603111318313,1.0,,0.0,192,192
+mlx,mlx-community/Qwen3-0.6B-4bit,power-fast,6,33.039556812339775,5.551215277777778,0.5833333333333334,0.0,192,1065.8333333333333

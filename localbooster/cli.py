@@ -12,6 +12,7 @@ from typing import Iterable
 from localbooster.backends.errors import OptionalDependencyError
 from localbooster.backends.registry import load_backend
 from localbooster.config import GenerationConfig, get_preset
+from localbooster.evaluation import score_response
 from localbooster.generation import build_sampler
 from localbooster.metrics import GenerationResult
 
@@ -72,7 +73,11 @@ def build_parser() -> argparse.ArgumentParser:
 def _add_generation_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--model", required=True)
     parser.add_argument("--backend", choices=["transformers", "mlx"], default="transformers")
-    parser.add_argument("--sampler", choices=["standard", "temperature", "power"], default="standard")
+    parser.add_argument(
+        "--sampler",
+        choices=["standard", "temperature", "power"],
+        default="standard",
+    )
     parser.add_argument("--preset", choices=["fast", "balanced", "deep"], default=None)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--temperature", type=float, default=0.7)
@@ -80,7 +85,11 @@ def _add_generation_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--mcmc-steps", type=int, default=2)
     parser.add_argument("--block-count", type=int, default=8)
     parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--device", default=None, help="Transformers device override, e.g. mps/cpu.")
+    parser.add_argument(
+        "--device",
+        default=None,
+        help="Transformers device override, e.g. mps/cpu.",
+    )
 
 
 def cmd_generate(args: argparse.Namespace) -> int:
@@ -116,13 +125,23 @@ def cmd_bench(args: argparse.Namespace) -> int:
             prompt = record["prompt"]
             for sampler_name in samplers:
                 result = _run_with_backend(args, backend, prompt, sampler_name)
+                completion = _completion_text(backend, prompt, result)
                 output = {
                     "id": record.get("id"),
+                    "benchmark": record.get("benchmark"),
+                    "task": record.get("task"),
                     "prompt": prompt,
                     "expected": record.get("answer"),
                     "sampler": sampler_name,
+                    "completion": completion,
                     "result": result.to_dict(),
                 }
+                if record.get("answer") is not None:
+                    output["score"] = score_response(
+                        completion,
+                        str(record["answer"]),
+                        record.get("grader", "auto"),
+                    ).to_dict()
                 handle.write(json.dumps(output, ensure_ascii=False) + "\n")
                 handle.flush()
     print(f"wrote {args.out}")
@@ -140,12 +159,22 @@ def cmd_report(args: argparse.Namespace) -> int:
                 )
             metrics = dict(record["result"]["metrics"])
             metrics["sampler"] = record.get("sampler", metrics["sampler"])
+            if record.get("score") is not None:
+                metrics["correct"] = bool(record["score"]["correct"])
             rows.append(metrics)
     if not rows:
         print("No rows.")
         return 0
-    print("| Backend | Model | Sampler | Runs | Avg latency | Avg cost x | Avg accept |")
-    print("| --- | --- | --- | ---: | ---: | ---: | ---: |")
+    has_scores = any("correct" in row for row in rows)
+    if has_scores:
+        print(
+            "| Backend | Model | Sampler | Runs | Accuracy | Avg latency | "
+            "Avg cost x | Avg accept |"
+        )
+        print("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |")
+    else:
+        print("| Backend | Model | Sampler | Runs | Avg latency | Avg cost x | Avg accept |")
+        print("| --- | --- | --- | ---: | ---: | ---: | ---: |")
     for key, group in _group_rows(rows).items():
         backend, model, sampler = key
         latency = _avg(row["latency_seconds"] for row in group)
@@ -153,10 +182,18 @@ def cmd_report(args: argparse.Namespace) -> int:
         accept = _avg(
             row["acceptance_ratio"] for row in group if row["acceptance_ratio"] is not None
         )
-        print(
-            f"| {backend} | {model} | {sampler} | {len(group)} | "
-            f"{latency:.2f}s | {_fmt(cost)} | {_fmt(accept)} |"
-        )
+        if has_scores:
+            scored = [row for row in group if "correct" in row]
+            accuracy = _avg(1.0 if row["correct"] else 0.0 for row in scored)
+            print(
+                f"| {backend} | {model} | {sampler} | {len(group)} | "
+                f"{_fmt(accuracy)} | {latency:.2f}s | {_fmt(cost)} | {_fmt(accept)} |"
+            )
+        else:
+            print(
+                f"| {backend} | {model} | {sampler} | {len(group)} | "
+                f"{latency:.2f}s | {_fmt(cost)} | {_fmt(accept)} |"
+            )
     return 0
 
 
@@ -181,6 +218,11 @@ def _load_backend_from_args(args: argparse.Namespace):
     if args.backend == "transformers" and args.device is not None:
         backend_kwargs["device"] = args.device
     return load_backend(args.backend, args.model, **backend_kwargs)
+
+
+def _completion_text(backend, prompt: str, result: GenerationResult) -> str:
+    prefix_len = len(backend.encode(prompt))
+    return backend.decode(result.token_ids[prefix_len:])
 
 
 def _config_from_args(args: argparse.Namespace, sampler_name: str) -> GenerationConfig:

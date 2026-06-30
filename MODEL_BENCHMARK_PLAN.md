@@ -115,6 +115,27 @@ Use a small, reproducible suite before trying to chase every leaderboard.
 | Scientific reasoning | GPQA Diamond small split | Keep as later validation; small models may be weak and runs are slower. |
 | General knowledge/reasoning | MMLU-Pro small subset | Later comparison only, not initial smoke testing. |
 
+### First Local Benchmark Result
+
+The first scored benchmark run used the local MLX model
+`mlx-community/Qwen3-0.6B-4bit` on a 6-example MATH500 mini slice with 192 generated tokens.
+The three-way comparison matched the official research framing: standard sampling,
+low-temperature sampling, and MCMC/power sampling.
+
+| Model | Sampler | Accuracy | Avg Latency | Cost x | Acceptance |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `mlx-community/Qwen3-0.6B-4bit` | `standard` | 0.00 | 4.99s | 1.00 | n/a |
+| `mlx-community/Qwen3-0.6B-4bit` | `temperature` | 0.00 | 4.50s | 1.00 | n/a |
+| `mlx-community/Qwen3-0.6B-4bit` | `power-fast` | 0.00 | 33.04s | 5.55 | 0.58 |
+
+Interpretation:
+
+- MATH500 is too hard for this 0.6B 4-bit model at this token budget.
+- `power-fast` did not improve accuracy on this slice, while adding meaningful latency.
+- This is still a useful negative result: the benchmark harness now reports quality and cost
+  together, and it shows why the next serious run should move to `Qwen3-1.7B-4bit` and/or a
+  graduated suite such as GSM8K before relying on MATH500.
+
 ### Reporting Metrics
 
 Every benchmark result should report:

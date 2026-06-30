@@ -74,6 +74,18 @@ localbooster bench \
   --out results/smoke-qwen3-1.7b-mlx.jsonl
 ```
 
+Small scored MATH500 benchmark slice:
+
+```bash
+localbooster bench \
+  --backend mlx \
+  --model mlx-community/Qwen3-0.6B-4bit \
+  --dataset examples/benchmarks/math500_mini.jsonl \
+  --samplers standard,temperature,power-fast \
+  --max-new-tokens 192 \
+  --out results/math500-mini-qwen3-0.6b-mlx-t192.jsonl
+```
+
 Summarize result costs:
 
 ```bash

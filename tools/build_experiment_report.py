@@ -27,6 +27,7 @@ class SummaryRow:
     avg_latency_seconds: float
     avg_cost_multiplier: float | None
     avg_acceptance_ratio: float | None
+    avg_accuracy: float | None
     avg_generated_tokens: float
     avg_sampled_tokens: float
 
@@ -39,6 +40,7 @@ class SummaryRow:
             "avg_latency_seconds": self.avg_latency_seconds,
             "avg_cost_multiplier": self.avg_cost_multiplier,
             "avg_acceptance_ratio": self.avg_acceptance_ratio,
+            "avg_accuracy": self.avg_accuracy,
             "avg_generated_tokens": self.avg_generated_tokens,
             "avg_sampled_tokens": self.avg_sampled_tokens,
         }
@@ -94,6 +96,11 @@ def summarize(records: list[dict]) -> list[SummaryRow]:
                 avg_acceptance_ratio=mean_optional(
                     metric.get("acceptance_ratio") for metric in metrics
                 ),
+                avg_accuracy=mean_optional(
+                    1.0 if record["score"]["correct"] else 0.0
+                    for record in group
+                    if record.get("score") is not None
+                ),
                 avg_generated_tokens=mean(metric["generated_tokens"] for metric in metrics),
                 avg_sampled_tokens=mean(metric["sampled_tokens"] for metric in metrics),
             )
@@ -145,6 +152,14 @@ def write_experiment(
         "avg_acceptance_ratio",
         "ratio",
     )
+    if any(row.avg_accuracy is not None for row in summaries):
+        write_bar_chart(
+            plots_dir / "accuracy.svg",
+            "Benchmark Accuracy",
+            summaries,
+            "avg_accuracy",
+            "fraction correct",
+        )
     write_grouped_token_chart(plots_dir / "tokens.svg", summaries)
     write_readme(output_dir / "README.md", title, records, summaries)
 
@@ -184,17 +199,23 @@ def write_readme(
     model = summaries[0].model if summaries else "unknown"
     backend = summaries[0].backend if summaries else "unknown"
     generated_tokens = summaries[0].avg_generated_tokens if summaries else 0
+    has_scores = any(row.avg_accuracy is not None for row in summaries)
+    purpose = (
+        "quality, runtime, and cost benchmark"
+        if has_scores
+        else "runtime and cost smoke test, not an accuracy benchmark"
+    )
     lines = [
         f"# {title}",
         "",
-        "This folder contains a tracked LocalBooster smoke experiment.",
+        "This folder contains a tracked LocalBooster experiment.",
         "",
         "## Scope",
         "",
         f"- backend: `{backend}`",
         f"- model: `{model}`",
         f"- records: `{len(records)}` JSONL rows",
-        "- purpose: runtime and cost smoke test, not an accuracy benchmark",
+        f"- purpose: {purpose}",
         (
             f"- note: runs used short {generated_tokens:.0f}-token completions, "
             "so answers may be incomplete"
@@ -202,19 +223,63 @@ def write_readme(
         "",
         "## Summary",
         "",
-        (
-            "| Sampler | Runs | Avg Latency | Avg Cost x | Avg Acceptance | "
-            "Avg Generated | Avg Sampled |"
-        ),
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for row in summaries:
-        lines.append(
-            f"| `{row.sampler}` | {row.runs} | {row.avg_latency_seconds:.2f}s | "
-            f"{fmt_optional(row.avg_cost_multiplier)} | "
-            f"{fmt_optional(row.avg_acceptance_ratio)} | "
-            f"{row.avg_generated_tokens:.1f} | {row.avg_sampled_tokens:.1f} |"
+    if has_scores:
+        lines.extend(
+            [
+                (
+                    "| Sampler | Runs | Accuracy | Avg Latency | Avg Cost x | "
+                    "Avg Acceptance | Avg Generated | Avg Sampled |"
+                ),
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
         )
+    else:
+        lines.extend(
+            [
+                (
+                    "| Sampler | Runs | Avg Latency | Avg Cost x | Avg Acceptance | "
+                    "Avg Generated | Avg Sampled |"
+                ),
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+    for row in summaries:
+        if has_scores:
+            lines.append(
+                f"| `{row.sampler}` | {row.runs} | {fmt_optional(row.avg_accuracy)} | "
+                f"{row.avg_latency_seconds:.2f}s | {fmt_optional(row.avg_cost_multiplier)} | "
+                f"{fmt_optional(row.avg_acceptance_ratio)} | "
+                f"{row.avg_generated_tokens:.1f} | {row.avg_sampled_tokens:.1f} |"
+            )
+        else:
+            lines.append(
+                f"| `{row.sampler}` | {row.runs} | {row.avg_latency_seconds:.2f}s | "
+                f"{fmt_optional(row.avg_cost_multiplier)} | "
+                f"{fmt_optional(row.avg_acceptance_ratio)} | "
+                f"{row.avg_generated_tokens:.1f} | {row.avg_sampled_tokens:.1f} |"
+            )
+    chart_lines = [
+        "![Average latency](plots/latency_seconds.svg)",
+        "",
+        "![Cost multiplier](plots/cost_multiplier.svg)",
+        "",
+        "![Acceptance ratio](plots/acceptance_ratio.svg)",
+        "",
+    ]
+    if has_scores:
+        chart_lines.extend(
+            [
+                "![Benchmark accuracy](plots/accuracy.svg)",
+                "",
+            ]
+        )
+    chart_lines.extend(
+        [
+            "![Token counts](plots/tokens.svg)",
+            "",
+        ]
+    )
     lines.extend(
         [
             "",
@@ -226,19 +291,13 @@ def write_readme(
             "- `plots/latency_seconds.svg`: average latency by sampler",
             "- `plots/cost_multiplier.svg`: average sampled-token cost multiplier",
             "- `plots/acceptance_ratio.svg`: MCMC acceptance ratio where applicable",
+            "- `plots/accuracy.svg`: benchmark accuracy, when scored answers are present",
             "- `plots/tokens.svg`: generated vs sampled token counts",
             "",
             "## Charts",
             "",
-            "![Average latency](plots/latency_seconds.svg)",
-            "",
-            "![Cost multiplier](plots/cost_multiplier.svg)",
-            "",
-            "![Acceptance ratio](plots/acceptance_ratio.svg)",
-            "",
-            "![Token counts](plots/tokens.svg)",
-            "",
         ]
+        + chart_lines
     )
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
