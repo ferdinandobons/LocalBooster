@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="312" viewBox="0 0 860 312">
+<rect width="100%" height="100%" fill="#ffffff" />
+<text x="24" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#222">Accuracy (fraction)</text>
+<text x="24" y="74" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-0.6b standard</text>
+<rect x="260" y="56" width="0.00" height="20" rx="3" fill="#109d58" />
+<text x="268.0" y="72" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.00</text>
+<text x="24" y="108" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-0.6b temperature</text>
+<rect x="260" y="90" width="0.00" height="20" rx="3" fill="#f4b400" />
+<text x="268.0" y="106" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.00</text>
+<text x="24" y="142" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-0.6b power-fast</text>
+<rect x="260" y="124" width="0.00" height="20" rx="3" fill="#db4437" />
+<text x="268.0" y="140" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.00</text>
+<text x="24" y="176" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-1.7b standard</text>
+<rect x="260" y="158" width="500.00" height="20" rx="3" fill="#109d58" />
+<text x="768.0" y="174" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.33</text>
+<text x="24" y="210" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-1.7b temperature</text>
+<rect x="260" y="192" width="500.00" height="20" rx="3" fill="#f4b400" />
+<text x="768.0" y="208" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.33</text>
+<text x="24" y="244" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">qwen3-1.7b power-fast</text>
+<rect x="260" y="226" width="0.00" height="20" rx="3" fill="#db4437" />
+<text x="268.0" y="242" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#222">0.00</text>
+</svg>

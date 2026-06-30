@@ -131,8 +131,10 @@ def grade_math(prediction: str, expected: str) -> bool:
     if prediction_norm == expected_norm:
         return True
 
-    prediction_number = parse_number(prediction_norm)
     expected_number = parse_number(expected_norm)
+    prediction_number = parse_number(prediction_norm)
+    if prediction_number is None and expected_number is not None and len(prediction) <= 80:
+        prediction_number = parse_last_number(prediction)
     if prediction_number is not None and expected_number is not None:
         return prediction_number == expected_number
 
@@ -175,3 +177,12 @@ def parse_number(value: str) -> Fraction | None:
         return Fraction(value)
     except ValueError:
         return None
+
+
+def parse_last_number(value: str) -> Fraction | None:
+    matches = re.findall(r"-?\d[\d,]*(?:\.\d+)?(?:/\d+)?", value)
+    for match in reversed(matches):
+        parsed = parse_number(match)
+        if parsed is not None:
+            return parsed
+    return None

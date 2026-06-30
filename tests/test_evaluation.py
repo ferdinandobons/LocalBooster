@@ -26,6 +26,20 @@ class EvaluationTest(unittest.TestCase):
 
         self.assertEqual(extract_prediction(response), "42")
 
+    def test_scores_last_numeric_answer_when_format_is_loose(self):
+        score = score_response("The result is 40, so the final answer is 42.", "42", "math")
+
+        self.assertTrue(score.correct)
+
+    def test_does_not_score_long_reasoning_with_embedded_expected_number(self):
+        response = (
+            "Okay, let's see. Wendi feeds each of her 20 chickens three cups each day. "
+            "I need to figure out the rest of the calculation."
+        )
+        score = score_response(response, "20", "math")
+
+        self.assertFalse(score.correct)
+
 
 if __name__ == "__main__":
     unittest.main()

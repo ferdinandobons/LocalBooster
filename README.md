@@ -86,6 +86,19 @@ localbooster bench \
   --out results/math500-mini-qwen3-0.6b-mlx-t192.jsonl
 ```
 
+Small scored GSM8K benchmark slice:
+
+```bash
+localbooster bench \
+  --backend mlx \
+  --model mlx-community/Qwen3-1.7B-4bit \
+  --dataset examples/benchmarks/gsm8k_mini.jsonl \
+  --limit 3 \
+  --samplers standard,temperature,power-fast \
+  --max-new-tokens 128 \
+  --out results/gsm8k-mini-clean3-qwen3-1.7b-mlx-t128.jsonl
+```
+
 Summarize result costs:
 
 ```bash

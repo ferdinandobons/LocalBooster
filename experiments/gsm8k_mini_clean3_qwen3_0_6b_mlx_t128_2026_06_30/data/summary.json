@@ -1,0 +1,42 @@
+{
+  "title": "GSM8K Mini Clean3 Qwen3 0.6B MLX T128",
+  "record_count": 9,
+  "summaries": [
+    {
+      "backend": "mlx",
+      "model": "mlx-community/Qwen3-0.6B-4bit",
+      "sampler": "standard",
+      "runs": 3,
+      "avg_latency_seconds": 3.346256514079869,
+      "avg_cost_multiplier": 1.0,
+      "avg_acceptance_ratio": null,
+      "avg_accuracy": 0.0,
+      "avg_generated_tokens": 128,
+      "avg_sampled_tokens": 128
+    },
+    {
+      "backend": "mlx",
+      "model": "mlx-community/Qwen3-0.6B-4bit",
+      "sampler": "temperature",
+      "runs": 3,
+      "avg_latency_seconds": 3.646959430693338,
+      "avg_cost_multiplier": 1.0,
+      "avg_acceptance_ratio": null,
+      "avg_accuracy": 0.0,
+      "avg_generated_tokens": 128,
+      "avg_sampled_tokens": 128
+    },
+    {
+      "backend": "mlx",
+      "model": "mlx-community/Qwen3-0.6B-4bit",
+      "sampler": "power-fast",
+      "runs": 3,
+      "avg_latency_seconds": 24.255870958324522,
+      "avg_cost_multiplier": 5.317708333333333,
+      "avg_acceptance_ratio": 0.75,
+      "avg_accuracy": 0.0,
+      "avg_generated_tokens": 128,
+      "avg_sampled_tokens": 680.6666666666666
+    }
+  ]
+}

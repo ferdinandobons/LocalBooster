@@ -136,6 +136,29 @@ Interpretation:
   together, and it shows why the next serious run should move to `Qwen3-1.7B-4bit` and/or a
   graduated suite such as GSM8K before relying on MATH500.
 
+### First GSM8K Model Compare
+
+The first cleaner model-vs-model run used the same three GSM8K test examples across
+`mlx-community/Qwen3-0.6B-4bit` and `mlx-community/Qwen3-1.7B-4bit`, with 128 generated
+tokens and the same sampler set.
+
+| Model | Sampler | Accuracy | Avg Latency | Cost x | Acceptance |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `Qwen3-0.6B-4bit` | `standard` | 0.00 | 3.35s | 1.00 | n/a |
+| `Qwen3-0.6B-4bit` | `temperature` | 0.00 | 3.65s | 1.00 | n/a |
+| `Qwen3-0.6B-4bit` | `power-fast` | 0.00 | 24.26s | 5.32 | 0.75 |
+| `Qwen3-1.7B-4bit` | `standard` | 0.33 | 3.41s | 1.00 | n/a |
+| `Qwen3-1.7B-4bit` | `temperature` | 0.33 | 3.69s | 1.00 | n/a |
+| `Qwen3-1.7B-4bit` | `power-fast` | 0.00 | 42.26s | 5.19 | 0.58 |
+
+Interpretation:
+
+- The larger 1.7B model is already better than 0.6B under normal decoding on this tiny slice.
+- `power-fast` is not yet beneficial on this GSM8K subset; it adds 5x+ sampled-token cost and
+  lowers observed accuracy for the 1.7B run.
+- The likely next algorithmic work is sampler quality, prompt discipline, and candidate
+  selection, not merely trying larger models.
+
 ### Reporting Metrics
 
 Every benchmark result should report:

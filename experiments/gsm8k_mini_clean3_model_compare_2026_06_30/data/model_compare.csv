@@ -1,0 +1,7 @@
+label,backend,model,sampler,runs,avg_latency_seconds,avg_cost_multiplier,avg_acceptance_ratio,avg_accuracy,avg_generated_tokens,avg_sampled_tokens,experiment_title
+qwen3-0.6b,mlx,mlx-community/Qwen3-0.6B-4bit,standard,3,3.346256514079869,1.0,,0.0,128,128,GSM8K Mini Clean3 Qwen3 0.6B MLX T128
+qwen3-0.6b,mlx,mlx-community/Qwen3-0.6B-4bit,temperature,3,3.646959430693338,1.0,,0.0,128,128,GSM8K Mini Clean3 Qwen3 0.6B MLX T128
+qwen3-0.6b,mlx,mlx-community/Qwen3-0.6B-4bit,power-fast,3,24.255870958324522,5.317708333333333,0.75,0.0,128,680.6666666666666,GSM8K Mini Clean3 Qwen3 0.6B MLX T128
+qwen3-1.7b,mlx,mlx-community/Qwen3-1.7B-4bit,standard,3,3.4149482916885368,1.0,,0.3333333333333333,128,128,GSM8K Mini Clean3 Qwen3 1.7B MLX T128
+qwen3-1.7b,mlx,mlx-community/Qwen3-1.7B-4bit,temperature,3,3.691698611015454,1.0,,0.3333333333333333,128,128,GSM8K Mini Clean3 Qwen3 1.7B MLX T128
+qwen3-1.7b,mlx,mlx-community/Qwen3-1.7B-4bit,power-fast,3,42.26467344428723,5.1875,0.5833333333333334,0.0,128,664,GSM8K Mini Clean3 Qwen3 1.7B MLX T128
